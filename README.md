@@ -19,8 +19,8 @@ hashsearch.py requries at least one argument of either the --csv or --md5.
 
 Examples
 
-1. pytime -m <hashvalue>
-2. pytime -c <csvfile>
+1. hashsearch.py -m \<hashvalue\>
+2. hashsearch.py -c \<csvfile\>
 
 ## Credits
 
