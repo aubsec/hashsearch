@@ -20,6 +20,7 @@ hashsearch.py requries at least one argument of either the -m or -M..
 Examples
 
 Example 1:  hashsearch.py -m 0d1ef429ed4a31753e5905e5356ba94d
+
 Example 2:  hashsearch.py -M md5-file.txt
 
 ## Credits
