@@ -7,20 +7,20 @@ to stdout in CSV format data about the hashes discovered.
 
 ## Usage
 
-hashsearch.py requries at least one argument of either the --csv or --md5.
+hashsearch.py requries at least one argument of either the -m or -M..
 
 |Argument   |Description|
 |---        |---|
 |-a, --api |Specify a VirusTotal API key.|
-|-c, --csv |Input csv file of hashes|
 |-h, --help |show this help message and exit|
 |-m, --md5 |Specify a single MD5 hash|
+|-M, --MD5-List|Specify a text file with a list of MD5 hashes|
 
 
 Examples
 
-1. hashsearch.py -m \<hashvalue\>
-2. hashsearch.py -c \<csvfile\>
+Example 1:  hashsearch.py -m 0d1ef429ed4a31753e5905e5356ba94d
+Example 2:  hashsearch.py -M md5-file.txt
 
 ## Credits
 
