@@ -25,6 +25,8 @@ import argparse
 from argparse import RawTextHelpFormatter
 import csv
 import datetime
+import hashlib
+import os
 import sys
 import tempfile
 import urllib.request
@@ -33,45 +35,82 @@ import zipfile
 #Constants
 API_KEY = 'd59a06e314884e3b55bb6710dfea3f21bb6e3b4eb58f42'
 
-#Downloads and unzips the NSRL 
-#TD 1.  Verify the NSRL package does not change.
-#TD 2.  Have the function check to see if hte NSRL is already downloaded.
-#TD 3.  Call 
-def getNSRL():
+# Functions are start with Main() at the bottom.  Rest are in alphabetical order.
+
+# CheckNSRLHash():
+# Checks if the NSRL has already been downloaded.
+# Then checks the SHA1 hash posted on the NSRL page to the hash of the existing NSRL.
+# If file exists and hash matches, will return True.
+# If file does not exist or the hash does not match, will return False.
+def CheckNSRLHash(ver):
+# Setup local variables.   
+# Cleans up variables removing newlines and periods where necessary.
+    webDoc = tempfile.gettempdir() + '/webDoc.htm'
+    findString = 'SHA1(rds_' + ver.replace('.','') + 'u.zip'
+    findString = findString.replace('\n','').replace('\r','')
+    zipFile = os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip'
+# Tries opening zipFie.
+# If unsucessful, exception will return false to GetNSRL() and zip will be downloaded.
+# If sucessful, will check the SHA1 hash of zipFile to the hash posted on webDoc. 
+# If hashes match, will return True to GetNSRL().
     try:
-        tmpFile = tempfile.gettempdir() + '/nsrl.zip'
-        
+        with open(zipFile, 'rb') as zipFileOpen:
+            hashDigest = hashlib.sha1(zipFileOpen.read()).hexdigest()
+            with open(webDoc, 'r') as webDocOpen:
+                for line in webDocOpen:
+                    if findString in line:
+                        checkHash = line[-41:]
+                        checkHash = checkHash.replace('\n','').replace('\r','')
+# If the hash from the nsrl page matches the hash of the zip file, then function returns True.
+# If true is returned, program will not redownload the rds_<ver>u.zip file.
+# If false is returned, GetNSRL() will download the rds_<ver>u.zip.
+                        if checkHash == hashDigest:
+                            return True
+                        else:
+                            return False
+    except:
+        return False
 
-        
-        if os.path.isfile(tmpFile) == True:
-            #Check hash value of tmpFile to the SHA hash value on NSRL site.
-            #If hash value is different, delete tmpFile and download.
-        else:
-            continue
-        
-        
-        
-        
-        sys.stderr.write('[+] Starting download of NSRL')
-        url = 'http://www.nsrl.nist.gov/RDS/rds_2.50/rds_250m.zip' #The version number does change.  Modify to parse version number before downloading
-        response = urllib.request.urlretrieve(url, tmpFile)
-        sys.stderr.write('[+] NSRL downloaded to ' + directory + '/\n[+] Beginning unzip to ' + tempfile.gettempdir() + '/')
-        unzip(tmpFile, tempfile.gettempdir()) 
-        sys.stderr.write('[+] Download of NSRL was sucessful.')
-        return 0
-    except Exception as errorValue:
-        function = 'getNSRL()'
-        exceptionHandler(errorValue, function)
-        return 1
-
-
-#ExceptionHandler() collects error codes and prints to screen
+# ExceptionHandler():
+# Collects error codes and prints to screen
 def ExceptionHandler(errorValue, function):
     sys.stderr.write('[!] An error has occured in function ' + function + '\n')
     sys.stderr.write('[!] ' + str(errorValue) + '\n')
     exit(1)
 
-# Main
+# GetNSRL():
+# Downloads and unzips the NSRL.
+def GetNSRL():
+    webDoc = tempfile.gettempdir() + '/webDoc.htm'
+    urllib.request.urlretrieve('http://www.nsrl.nist.gov/Downloads.htm', webDoc)
+    with open(webDoc, 'r') as webDocOpen:
+        for line in webDocOpen:
+            if '<p><h2>RDS' in line:
+                ver = str(line[16:20:] + '\n')
+                break
+            else:
+                continue
+    zipFile = os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip'
+
+# checkHash():
+# Verifies whether the NSRL already exists in cwd.  
+# If it does, it checks the hash of the file. 
+    checkHash = CheckNSRLHash(ver)
+# If the checkHash returns as False, the updated NSRL will be downloaded.
+    if checkHash == False:
+        sys.stderr.write('[+] Starting download of NSRL\n')
+        url = 'http://www.nsrl.nist.gov/RDS/rds_' + ver + '/rds_' + ver.replace('.','') + 'u.zip'
+        url = url.replace('\n', '').replace('\r', '')
+        urllib.request.urlretrieve(url, zipFile)
+        sys.stderr.write('[+] Download of NSRL was sucessful.\n')
+# Unzips NSRLFile.txt from rds_<ver>.zip regardless of whether it is already there.
+    with zipfile.ZipFile(zipFile) as zf:
+        sys.stderr.write('[+] Unzipping NSRLFile.txt.\n')
+        zf.extract('NSRLFile.txt', os.getcwd()) 
+# Return to Main() once completed.  Returns 0 regardless. 
+    return 0
+
+# Main():
 def Main():
     parser = argparse.ArgumentParser(description='''
 hashsearh.py takes as input a text file of MD5 hashes or a single MD5 hash value and performs 
@@ -85,15 +124,14 @@ Example 2:  hashsearch.py -M md5-file.txt
 https://github.com/aubsec/hashsearch.git
 https://twitter.com/aubsec''', formatter_class=RawTextHelpFormatter)
     parser.add_argument('-a', '--api', help='Optional. Specify a VirusTotal API Key.  Can also modify the value of the API_KEY variable', required=False)
-    parser.add_argument('-m', '--md5', help='Optional. Specify a single MD5 hash value to search.', type=dateFormat, required=False)
-    parser.add_argument('-M', '--MD5-List', help='Optional. Specify a text list of MD5 hash values to search.', type=dateFormat, required=False)
+    parser.add_argument('-m', '--md5', help='Optional. Specify a single MD5 hash value to search.', required=False)
+    parser.add_argument('-M', '--MD5-List', help='Optional. Specify a text list of MD5 hash values to search.', required=False)
     args = parser.parse_args()
     #sys.stderr.write(str(args.start) + '\n')
     #sys.stderr.write(str(args.end) + '\n')
-    
     try:
-        csvSorter(args)
-        sys.stderr.write('[+] Program completed sucessfully\n')
+        GetNSRL()
+        sys.stderr.write('[+] Program completed sucessfully.\n')
         exit(0)
     except Exception as errorValue:
         function = 'Main()'
