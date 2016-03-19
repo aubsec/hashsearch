@@ -23,6 +23,14 @@ Example 1:  hashsearch.py -m 0d1ef429ed4a31753e5905e5356ba94d
 
 Example 2:  hashsearch.py -M md5-file.txt
 
+## ToDo
+- [x] NSRL Download, Unzip, and Hashcheck
+- [ ] User input of single MD5 Hash
+- [ ] User input of MD5 hash list
+- [ ] VirusTotal search using constant API key.
+- [ ] VirusTotal search using user defined API key.
+- [ ] CSV formatted output to stdout.
+
 ## Credits
 
 Matthew Aubert
