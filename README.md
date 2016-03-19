@@ -30,6 +30,8 @@ Example 2:  hashsearch.py -M md5-file.txt
 - [ ] VirusTotal search using constant API key.
 - [ ] VirusTotal search using user defined API key.
 - [ ] CSV formatted output to stdout.
+- [ ] Fully commented.
+- [ ] Error handling.
 
 ## Credits
 
