@@ -33,19 +33,24 @@ import urllib.request
 import zipfile
 
 #Constants
-API_KEY = 'd59a06e314884e3b55bb6710dfea3f21bb6e3b4eb58f42'
+API_KEY = '' # Change to personal VirusTotal API key or specify key using the -a argument.
 
 # Classes, modules, and functions start with Main() at the bottom.  Rest are in alphabetical order.
-# Tree:
+# Organizational Tree:
 # class NSRL()
 #   def CheckNSRLHash()
 #   def GetNSRL()
 # def ExceptionHandler()
 # def Main()
 
+# class NSRL():
+# Contains two modules:
+#   def CheckNSRLHash()
+#   def GetNSRL()
+# Downloads NSRL zip file, verifies hash, and unzips appropriate file.
 class NSRL():
 
-# CheckNSRLHash():
+# def CheckNSRLHash():
 # Checks if the NSRL has already been downloaded.
 # Then checks the SHA1 hash posted on the NSRL page to the hash of the existing NSRL.
 # If file exists and hash matches, will return True.
@@ -84,7 +89,7 @@ class NSRL():
         except:
             return False
 
-# GetNSRL():
+# def GetNSRL():
 # Downloads and unzips the NSRL.
     def GetNSRL(self):
 
@@ -123,14 +128,14 @@ class NSRL():
         return 0
 
 
-# ExceptionHandler():
+# def ExceptionHandler():
 # Collects error codes and prints to screen
 def ExceptionHandler(errorValue, function):
     sys.stderr.write('[!] An error has occured in function ' + function + '\n')
     sys.stderr.write('[!] ' + str(errorValue) + '\n')
     exit(1)
 
-# Main():
+# def Main():
 # Function parses the arguments and sets them to variables.
 # Instatintiates the first object and passes execution to the object nsrl.
 def Main():
@@ -156,8 +161,11 @@ https://twitter.com/aubsec''', formatter_class=RawTextHelpFormatter)
 
 # Executes primary purpose of application.
     try:
+# Instantiates object based on class NSRL() and calls module GetNSRL().
         nsrl = NSRL()
         nsrl.GetNSRL()
+
+# If program completed sucessfully, write sucess message to stderr and exit with 0.
         sys.stderr.write('[+] Program completed sucessfully.\n')
         exit(0)
 
