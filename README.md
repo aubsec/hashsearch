@@ -11,27 +11,25 @@ hashsearch.py requries at least one argument of either the -m or -M..
 
 |Argument   |Description|
 |---        |---|
-|-a, --api |Specify a VirusTotal API key.|
+|-s, --string |Specify a string or file of strings to search the NSRL.|
 |-h, --help |show this help message and exit|
-|-m, --md5 |Specify a single MD5 hash|
-|-M, --MD5-List|Specify a text file with a list of MD5 hashes|
 
 
 Examples
 
-Example 1:  hashsearch.py -m 0d1ef429ed4a31753e5905e5356ba94d
+Example 1:  hashsearch.py -s 0d1ef429ed4a31753e5905e5356ba94d
 
-Example 2:  hashsearch.py -M md5-file.txt
+Example 2:  hashsearch.py -s file.txt
 
 ## ToDo
 - [x] NSRL Download, Unzip, and Hashcheck
-- [ ] User input of single MD5 Hash
-- [ ] User input of MD5 hash list
+- [x] User input of single MD5 Hash
+- [x] User input of MD5 hash list
 - [ ] VirusTotal search using constant API key.
 - [ ] VirusTotal search using user defined API key.
-- [ ] CSV formatted output to stdout.
-- [ ] Fully commented.
-- [ ] Error handling.
+- [x] CSV formatted output to stdout.
+- [x] Fully commented.
+- [x] Error handling.
 
 ## Credits
 
@@ -39,6 +37,7 @@ Matthew Aubert
 - @aubsec
 - aubsec@gmail.com
 - github.com/aubsec
+- aubsec.github.io
 
 ## License
 
