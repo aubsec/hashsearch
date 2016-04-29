@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-# hashsearch.py is used to search the NSRL and VirusTotal for MD5 hash
-# values.
+# hashsearch.py is used to search the NSRL for MD5 hash values.
 # Copyright (C) 2016 Matthew Aubert
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,11 +18,11 @@
 #
 # https://github.com/aubsec/hashsearch.git
 # https://twitter.com/aubsec
+# https://aubsec.github.io
 
-#imports
+# Imports
 import argparse
 from argparse import RawTextHelpFormatter
-import csv
 import datetime
 import hashlib
 import os
@@ -32,30 +31,36 @@ import tempfile
 import urllib.request
 import zipfile
 
-#Constants
-API_KEY = '' # Change to personal VirusTotal API key or specify key using the -a argument.
 
-# Classes, modules, and functions start with Main() at the bottom.  Rest are in alphabetical order.
+# Classes, methods, and functions.
+# Organized by hierarchically and alphabetically by class, method, and function. 
 # Organizational Tree:
-# class NSRL()
-#   def CheckNSRLHash()
-#   def GetNSRL()
+# class NsrlLookup()
+#   def checkNsrlHash()
+#   def getNsrl()
+#   def nsrlSearch()
+# def ExceptionCheck()
 # def ExceptionHandler()
 # def Main()
 
-# class NSRL():
-# Contains two modules:
-#   def CheckNSRLHash()
-#   def GetNSRL()
-# Downloads NSRL zip file, verifies hash, and unzips appropriate file.
-class NSRL():
 
-# def CheckNSRLHash():
+# class NsrlLookup():
+# Contains three methods:
+#   def checkNsrlHash()
+#   def getNsrl()
+#   def nsrlSearch()
+# Downloads NSRL zip file, verifies hash, and unzips appropriate file.
+# Parses NSRLFile.txt for user specified string. 
+# Outputs NSRLFile.txt line where there is a match.
+class NsrlLookup():
+
+
+# method checkNSRLHash():
 # Checks if the NSRL has already been downloaded.
 # Then checks the SHA1 hash posted on the NSRL page to the hash of the existing NSRL.
 # If file exists and hash matches, will return True.
 # If file does not exist or the hash does not match, will return False.
-    def CheckNSRLHash(self, ver):
+    def checkNsrlHash(self, ver):
 
 # Setup local variables.
         webDoc = tempfile.gettempdir() + '/webDoc.htm'
@@ -63,7 +68,7 @@ class NSRL():
 
 # Cleans up variables removing newlines, returns, and periods where necessary.
         findString = findString.replace('\n','').replace('\r','')
-        zipFile = os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip'
+        zipFile = str(os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip')
 
 # Tries opening zipFie.
 # If unsucessful, exception will return false to GetNSRL() and zip will be downloaded.
@@ -86,93 +91,192 @@ class NSRL():
                                 return True
                             else:
                                 return False
+        
+        except Exception as exceptValue:
+            exceptFunction = 'NsrlLookup.checkNsrlHash()'
+            return exceptValue, exceptFunction
+        
         except:
             return False
 
-# def GetNSRL():
-# Downloads and unzips the NSRL.
-    def GetNSRL(self):
 
+# method getNsrl():
+# Downloads and unzips the NSRL.
+    def getNsrl(self):
+        try:
 # Setup local variables.
-        webDoc = tempfile.gettempdir() + '/webDoc.htm'
-        urllib.request.urlretrieve('http://www.nsrl.nist.gov/Downloads.htm', webDoc)
-        with open(webDoc, 'r') as webDocOpen:
-            for line in webDocOpen:
-                if '<p><h2>RDS' in line:
-                    ver = str(line[16:20:] + '\n')
-                    break
-                else:
-                    continue
+            webDoc = tempfile.gettempdir() + '/webDoc.htm'
+            urllib.request.urlretrieve('http://www.nsrl.nist.gov/Downloads.htm', webDoc)
+            with open(webDoc, 'r') as webDocOpen:
+                for line in webDocOpen:
+                    if '<p><h2>RDS' in line:
+                        ver = str(line[16:20:] + '\n')
+                        break
+                    else:
+                        continue
 
 # Create variable with name of zip file and cleaup newlines, returns, and periods.
-        zipFile = os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip'
+            zipFile = str(os.getcwd() + '/rds_' + ver.replace('\n','').replace('\r','').replace('.','') + 'u.zip')
 
 # Verifies whether the NSRL already exists in cwd.
 # If it does, it checks the hash of the file.
-        checkHash = self.CheckNSRLHash(ver)
-
+            checkHash = False
+            
+            try:            
+                checkHash = self.checkNsrlHash(ver)
+            except:
+                pass
+            
 # If the checkHash returns as False, the updated NSRL will be downloaded.
-        if checkHash == False:
-            sys.stderr.write('[+] Starting download of NSRL\n')
-            url = 'http://www.nsrl.nist.gov/RDS/rds_' + ver + '/rds_' + ver.replace('.','') + 'u.zip'
-            url = url.replace('\n', '').replace('\r', '')
-            urllib.request.urlretrieve(url, zipFile)
-            sys.stderr.write('[+] Download of NSRL was sucessful.\n')
+            
+            if checkHash != True:
+                sys.stderr.write('[+] Starting download of NSRL\n')
+                url = 'http://www.nsrl.nist.gov/RDS/rds_' + ver + '/rds_' + ver.replace('.','') + 'u.zip'
+                url = url.replace('\n', '').replace('\r', '')
+                urllib.request.urlretrieve(url, zipFile)
+                sys.stderr.write('[+] Download of NSRL was sucessful.\n')
 
 # Unzips NSRLFile.txt from rds_<ver>.zip regardless of whether it is already there.
-        with zipfile.ZipFile(zipFile) as zf:
-            sys.stderr.write('[+] Unzipping NSRLFile.txt.\n')
-            zf.extract('NSRLFile.txt', os.getcwd()) 
+            with zipfile.ZipFile(zipFile) as zf:
+                sys.stderr.write('[+] Unzipping NSRLFile.txt.\n')
+                zf.extract('NSRLFile.txt', os.getcwd()) 
 
 # Return to Main() once completed.
-        return 0
+            return None, None
+
+        except Exception as exceptValue:
+            exceptFunction = 'GetNsrl.getNsrl()'
+            return exceptValue, exceptFunction
 
 
-# def ExceptionHandler():
+# method nsrlSearch()
+# Takes a string as input, seaches NSRLFile.txt for strings. 
+# Prints line in NSRLFile.txt if string is in line. 
+    def nsrlSearch(self, string):
+        exceptFunction = 'NsrlLookup.nsrlSearch()'
+        try:
+            with open('NSRLFile.txt','r') as openNsrl:
+                for line in openNsrl:
+                    if string.lower() in line.lower():
+                        print(line.strip().replace('"',''))
+                    else:
+                        continue
+            return None, None
+
+        except Exception as exceptValue:
+            exceptFunction = 'NsrlLookup.nsrlSearch()'
+            return exceptValue, exceptFunction
+
+        except:
+            return None, exceptFunction
+
+# Begin Main
+
+# function ExceptionCheck()
+# Quick reusable function to check for exceptions.
+def ExceptionCheck(exceptValue, exceptFunction):
+    
+    if exceptValue != None:
+        ExceptionHandler(exceptValue, exceptFunction)
+    else:
+        return
+
+
+# function ExceptionHandler():
 # Collects error codes and prints to screen
-def ExceptionHandler(errorValue, function):
-    sys.stderr.write('[!] An error has occured in function ' + function + '\n')
-    sys.stderr.write('[!] ' + str(errorValue) + '\n')
+def ExceptionHandler(exceptValue, exceptFunction):
+    sys.stderr.write('[!] An exception has occured in ' + str(exceptFunction) + '\n')
+    sys.stderr.write('[!] ' + str(exceptValue) + '\n')
     exit(1)
 
-# def Main():
+
+# function Main():
 # Function parses the arguments and sets them to variables.
 # Instatintiates the first object and passes execution to the object nsrl.
+# Catches exception return values and calls ExceptionCheck or ExceptionHandler.
 def Main():
     parser = argparse.ArgumentParser(description='''
-hashsearh.py takes as input a text file of MD5 hashes or a single MD5 hash value and performs 
-a searh of the NSRL and VirusTotal.  The purpose is to identify if the provided MD5 hashes
-are known Malicious or Known benign, allowing the analyst to focus their investigation.  The
-application will output to the std.out all findings in CSV format.
+hashsearh.py takes as input a text file of hashes or strings,  or a single hash value or string
+and performs a searh of the NSRL.  The purpose is to identify if the provided MD5 hashes are known, 
+allowing the analyst to focus their investigation.  The application will output to the stdout all 
+findings in CSV format.
 
-Example 1:  hashsearch.py -m 0d1ef429ed4a31753e5905e5356ba94d
-Example 2:  hashsearch.py -M md5-file.txt
+Example 1:  hashsearch.py -s 0d1ef429ed4a31753e5905e5356ba94d
+Example 2:  hashsearch.py -s kernel32.dll
+Example 3:  hashsearch.py -s File-Of-Strings.txt
+
+It may also be beneficial to redirect the stdout to to a csv file like in the example below.
+
+Example 4:  hashsearch.py -s kernel32.dll > out.csv
+
 
 https://github.com/aubsec/hashsearch.git
-https://twitter.com/aubsec''', formatter_class=RawTextHelpFormatter)
-    parser.add_argument('-a', '--api', help='Optional. Specify a VirusTotal API Key.  Can also modify the value of the API_KEY constant.', required=False)
-    parser.add_argument('-m', '--md5', help='Optional. Specify a single MD5 hash value to search.', required=False)
-    parser.add_argument('-M', '--MD5-List', help='Optional. Specify a text list of MD5 hash values to search.', required=False)
+https://twitter.com/aubsec
+https://aubsec.github.io''', formatter_class=RawTextHelpFormatter)
+
+
+    parser.add_argument('-s', '--string', help='Required. Specify a single hash value, string, or file of strings to search.', required=True)
+
     args = parser.parse_args()
 
 # These are here for debugging purposes.
-    #sys.stderr.write(str(args.start) + '\n')
-    #sys.stderr.write(str(args.end) + '\n')
+    sys.stderr.write('[+] String being parsed: ' + str(args.string) + '\n')
+
+# Sets default exception values.
+    exceptFunction = 'Main()'
+    exceptValue = None
 
 # Executes primary purpose of application.
     try:
-# Instantiates object based on class NSRL() and calls module GetNSRL().
-        nsrl = NSRL()
-        nsrl.GetNSRL()
+# Instantiates object based on class NSRLDownload() and calls method GetNSRL().
+        nsrl = NsrlLookup()
+        
+        exceptValue,exceptFunction = nsrl.getNsrl()
+
+# Checks if an exception was returned from nsrl.getNsrl().
+        ExceptionCheck(exceptValue,exceptFunction)
+        
+        sys.stderr.write('[+] Parsing NSRLFile.txt.\n ')
+
+# Verifies that the NSRLFile.txt was actually unzipped to the cwd. 
+# Also prints first line in NSRLFile.txt.
+        try:
+            fileTest = open('NSRLFile.txt', 'r')
+            print(fileTest.readline().strip().replace('"',''))
+            fileTest.close()
+        
+        except Exception as exceptValue:
+            ExceptionHandler(exceptValue, exceptFunction)
+       
+# Searches NSRL for specified string, even if string is a file in cwd. 
+        exceptValue, exceptFunction = nsrl.nsrlSearch(args.string)
+
+# Test if string is a file being opened.
+# If file is sucessfully open, loop through file and search NSRL for each line.                
+        try:
+            closedFile = str(os.getcwd() + '/' + args.string)
+            with open(closedFile, 'r') as openFile:
+            #with codecs.open(closedFile, "r",encoding='utf-8', errors='ignore') as openFile: 
+                for line in openFile:
+                    try:
+                        line = line.strip()
+                        exceptValue, exceptFunction = nsrl.nsrlSearch(line)
+                    except:
+                        continue
+        except:
+            pass
+
+# This ExceptionCheck call is commented out on purpose.
+# Due to encoding issues, it was generating an exception though the program completes sucessfully.
+        #ExceptionCheck(exceptValue, exceptFunction)
 
 # If program completed sucessfully, write sucess message to stderr and exit with 0.
         sys.stderr.write('[+] Program completed sucessfully.\n')
         exit(0)
 
 # If execution fails, collects errors and passes them to the ExeceptionHandler() function.
-    except Exception as errorValue:
-        function = 'Main()'
-        ExceptionHandler(errorValue, function)
+    except Exception as exceptValue:
+        ExceptionHandler(exceptValue, exceptFunction)
 
 if __name__=='__main__':
     Main()
