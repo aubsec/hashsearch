@@ -7,7 +7,7 @@ to stdout in CSV format data about the hashes discovered.
 
 ## Usage
 
-hashsearch.py requries at least one argument of either the -m or -M..
+hashsearch.py requries at least one argument of -s.
 
 |Argument   |Description|
 |---        |---|
