@@ -87,7 +87,7 @@ class NsrlLookup():
 # If true is returned, program will not redownload the rds_<ver>u.zip file.
 # If false is returned, GetNSRL() will download the rds_<ver>u.zip.
                             if checkHash == hashDigest:
-                                sys.stderr.write('[+] NSRL already downloaded and matches hash of posted zip.\n[+] Skipping download.\n')
+                                sys.stderr.write('[+] NSRL already downloaded and matches hash of posted zip. ')
                                 return True
                             else:
                                 return False
@@ -130,15 +130,15 @@ class NsrlLookup():
 # If the checkHash returns as False, the updated NSRL will be downloaded.
             
             if checkHash != True:
-                sys.stderr.write('[+] Starting download of NSRL\n')
+                sys.stderr.write('[*] Starting download of NSRL. This will take a few minutes...\n')
                 url = 'http://www.nsrl.nist.gov/RDS/rds_' + ver + '/rds_' + ver.replace('.','') + 'u.zip'
                 url = url.replace('\n', '').replace('\r', '')
                 urllib.request.urlretrieve(url, zipFile)
-                sys.stderr.write('[+] Download of NSRL was sucessful.\n')
+                sys.stderr.write('[+] Download of NSRL was sucessful. ')
 
 # Unzips NSRLFile.txt from rds_<ver>.zip regardless of whether it is already there.
             with zipfile.ZipFile(zipFile) as zf:
-                sys.stderr.write('[+] Unzipping NSRLFile.txt.\n')
+                sys.stderr.write('Unzipping NSRLFile.txt...\n')
                 zf.extract('NSRLFile.txt', os.getcwd()) 
 
 # Return to Main() once completed.
